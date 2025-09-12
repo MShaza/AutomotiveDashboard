@@ -186,39 +186,90 @@ ApplicationWindow {
             height: 75
 
             Row {
-                id: fuelRow
+                // other indicators can go here later
+                id: indicatorRow
 
-                spacing: 5
-                anchors.centerIn: parent
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 10
+                anchors.fill: parent
+                anchors.margins: 10
+                spacing: 50
 
-                // "E" label on the left
-                Text {
-                    verticalAlignment: Text.AlignVCenter
-                    text: "E"
-                    color: "red"
-                    font.pixelSize: 16
-                }
+                Item {
+                    id: fuelIndicator
 
-                // Fuel bars
-                Repeater {
-                    model: 10
+                    width: 200
+                    height: parent.height
 
-                    Rectangle {
-                        width: 10
-                        height: 15
-                        color: "#0BA6DF"
+                    Row {
+                        id: fuelRow
+
+                        spacing: 5
+                        anchors.bottom: parent.bottom
+                        //anchors.leftMargin: 30
+
+                        Text {
+                            text: "E"
+                            color: "red"
+                            font.pixelSize: 16
+                        }
+
+                        Repeater {
+                            id: fuelRepeater
+
+                            model: 10
+
+                            Rectangle {
+                                id: bar
+
+                                width: 10
+                                height: 15
+                                color: "#0BA6DF"
+                            }
+
+                        }
+
+                        Text {
+                            text: "F"
+                            color: "white"
+                            font.pixelSize: 16
+                        }
+
                     }
 
-                }
+                    // 🔹 Line overlay with GAP
+                    Canvas {
+                        anchors.fill: parent
+                        onPaint: {
+                            // angled up (with gap)
+                            // across
+                            // 🔹 top-right of last bar
+                            // extend upward
 
-                // "F" label on the right
-                Text {
-                    verticalAlignment: Text.AlignVCenter
-                    text: "F"
-                    color: "white"
-                    font.pixelSize: 16
+                            var ctx = getContext("2d");
+                            ctx.reset();
+                            ctx.lineWidth = 2;
+                            ctx.strokeStyle = "lightblue";
+                            var w = fuelRow.width;
+                            var h = fuelRepeater.itemAt(0).height; // bar height
+                            var x0 = fuelRow.x;
+                            var y0 = fuelRow.y; // 🔹 top of bars
+                            var gap = 30; // distance above bar tops
+                            ctx.beginPath();
+                            // Left angled (from top of first bar → up)
+                            ctx.moveTo(x0, y0);
+                            // 🔹 top-left of first bar
+                            ctx.lineTo(x0 + 20, y0 - gap);
+                            // Horizontal line above bars
+                            ctx.lineTo(x0 + w - 20, y0 - gap);
+                            // Right angled (from up → top of last bar)
+                            ctx.lineTo(x0 + w, y0);
+                            // Middle tick
+                            ctx.moveTo(x0 + w / 2, y0 - gap);
+                            // from floating line
+                            ctx.lineTo(x0 + w / 2, y0-10);
+                            ctx.stroke();
+                        }
+                    }
+
                 }
 
             }
