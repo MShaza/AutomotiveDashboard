@@ -1,0 +1,184 @@
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+
+ApplicationWindow {
+    property int maxSpeed: 180
+    property int step: 10
+    property int maxRPM: 8
+    property real startAngle: 120
+    property real sweepAngle: 300
+
+    width: 800
+    height: 480
+    visible: true
+    title: "Dashboard Demo"
+
+    Rectangle {
+        anchors.fill: parent
+        color: "black"
+
+        //**********************/
+        // Speedo Meter
+        //*********************/
+        Rectangle {
+            id: speedoMeter
+
+            width: parent.width * 0.4
+            height: width
+            radius: width / 2
+            color: "#222"
+            anchors.left: parent.left
+            border.color: "white"
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+
+            //***Needle
+            Rectangle {
+                width: 5
+                height: parent.height * 0.45
+                color: "red"
+                anchors.centerIn: parent
+            }
+
+            Text {
+                text: "km/h"
+                color: "white"
+                font.pixelSize: 18
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 50
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Repeater {
+                model: maxSpeed / step + 1
+
+                Rectangle {
+                    // compute angle for this tick (degrees)
+                    property real angleDeg: startAngle + (index * step * sweepAngle / maxSpeed)
+                    // convert to radians for cos/sin
+                    property real angleRad: angleDeg * Math.PI / 180
+                    // radius from center where tick centers will be placed
+                    property real r: speedoMeter.width / 2 - 20
+
+                    width: 3
+                    height: (index % 2 === 0) ? 20 : 12 // longer for major ticks, shorter for minor
+                    color: "white"
+                    radius: 1
+                    // IMPORTANT: Do NOT use anchors here. x,y are relative to speedoMeter because
+                    // the Repeater's parent is speedoMeter.
+                    x: speedoMeter.width / 2 + r * Math.cos(angleRad) - width / 2
+                    y: speedoMeter.height / 2 + r * Math.sin(angleRad) - height / 2
+                    // rotate around the rectangle center so it points outward
+                    transformOrigin: Item.Center
+                    rotation: angleDeg + 90
+                }
+
+            }
+
+        }
+
+        //**********************/
+        // Tcho Meter
+        //*********************/
+        Rectangle {
+            id: tachoMeter
+
+            width: parent.width * 0.4
+            height: width
+            radius: width / 2
+            color: "#222"
+            anchors.right: parent.right
+            border.color: "white"
+            anchors.rightMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+
+            //****needle****
+            Rectangle {
+                width: 5
+                height: parent.height * 0.45
+                color: "Orange"
+                anchors.centerIn: parent
+            }
+
+            Text {
+                text: "x 1000r/min"
+                color: "white"
+                font.pixelSize: 18
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 50
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Repeater {
+                model: 9 // 0..8
+
+                Rectangle {
+                    property real angleDeg: startAngle + (index * sweepAngle / maxRPM)
+                    property real angleRad: angleDeg * Math.PI / 180
+                    property real r: tachoMeter.width / 2 - 20
+
+                    width: 2
+                    height: (index % 2 === 0) ? 20 : 12
+                    color: index >= 6 ? "red" : "white"
+                    radius: 1
+                    x: tachoMeter.width / 2 + r * Math.cos(angleRad) - width / 2
+                    y: tachoMeter.height / 2 + r * Math.sin(angleRad) - height / 2
+                    rotation: angleDeg + 90
+                }
+
+            }
+
+        }
+
+        Rectangle {
+            id: indicatorBar
+
+            anchors.bottom: parent.bottom
+            border.color: "white"
+            color: "#222"
+            width: parent.width
+            height: 75
+
+            Row {
+                id: fuelRow
+
+                spacing: 5
+                anchors.centerIn: parent
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 10
+
+                // "E" label on the left
+                Text {
+                    verticalAlignment: Text.AlignVCenter
+                    text: "E"
+                    color: "red"
+                    font.pixelSize: 16
+                }
+
+                // Fuel bars
+                Repeater {
+                    model: 10
+
+                    Rectangle {
+                        width: 10
+                        height: 15
+                        color: "#0BA6DF"
+                    }
+
+                }
+
+                // "F" label on the right
+                Text {
+                    verticalAlignment: Text.AlignVCenter
+                    text: "F"
+                    color: "white"
+                    font.pixelSize: 16
+                }
+
+            }
+
+        }
+
+    }
+
+}
