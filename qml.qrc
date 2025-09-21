@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>qml/Main.qml</file>
-        <file>themes/DarkTheme.qml</file>
-        <file>themes/LightTheme.qml</file>
-    </qresource>
-</RCC>

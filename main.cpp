@@ -1,19 +1,39 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QTimer>            
+#include "dashboarddata.h"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
-                     &app, [url](QObject *obj, const QUrl &objUrl) {
-        if (!obj && url == objUrl)
-            QCoreApplication::exit(-1);
-    }, Qt::QueuedConnection);
 
-    engine.load(url);
+    DashboardData dashboard;
+
+    QTimer timer;
+    QObject::connect(&timer, &QTimer::timeout, [&]() {
+        static int s = 0;
+        s = (s + 5) % 180;  // cycle speed
+        dashboard.setSpeed(s);
+
+        float rpm = (s % 90) / 10.0f;  // fake rpm
+        dashboard.setRpm(rpm);
+
+        int fuel = 100 - (s % 100);    // fake fuel level
+        dashboard.setFuelLevel(fuel);
+    });
+    timer.start(500);
+
+   
+    engine.rootContext()->setContextProperty("dashboardData", &dashboard);
+
+    
+    engine.loadFromModule("AutomotiveDashboard", "Main");
+
+    if (engine.rootObjects().isEmpty())
+        return -1;
 
     return app.exec();
 }
